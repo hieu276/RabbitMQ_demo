@@ -13,7 +13,7 @@ public class EmitLogDirect {
         try (Connection connection = factory.newConnection();
              Channel channel = connection.createChannel()) {
             channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.DIRECT);
-            String routingKey = "";
+            String routingKey = "apple";
             String message = "message direct_log";
 
             channel.basicPublish(EXCHANGE_NAME, routingKey, null, message.getBytes("UTF-8"));

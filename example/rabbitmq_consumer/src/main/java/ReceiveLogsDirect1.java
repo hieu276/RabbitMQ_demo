@@ -1,10 +1,15 @@
+import ch.qos.logback.classic.util.ContextInitializer;
 import com.rabbitmq.client.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ReceiveLogsDirect1 {
 
     private static final String EXCHANGE_NAME = "direct_logs";
 
     public static void main(String[] argv) throws Exception {
+        System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, "config/logback.xml");
+        Logger logger = LoggerFactory.getLogger("hieund.logback");
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
         Connection connection = factory.newConnection();
@@ -12,20 +17,12 @@ public class ReceiveLogsDirect1 {
 
         channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.DIRECT);
         String queueName = channel.queueDeclare().getQueue();
-
-        if (argv.length < 1) {
-            System.err.println("Usage: ReceiveLogsDirect [info] [warning] [error]");
-            System.exit(1);
-        }
-
-        for (String severity : argv) {
-            channel.queueBind(queueName, EXCHANGE_NAME, severity);
-        }
-        System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
+        channel.queueBind(queueName, EXCHANGE_NAME, "apple");
 
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
             String message = new String(delivery.getBody(), "UTF-8");
-            System.out.println(" [x] Received '" + delivery.getEnvelope().getRoutingKey() + "':'" + message + "'");
+            logger.info("Received '" + delivery.getEnvelope().getRoutingKey() + "':'" + message + "'");
+            System.out.println("Received '" + delivery.getEnvelope().getRoutingKey() + "':'" + message + "'");
         };
         channel.basicConsume(queueName, true, deliverCallback, consumerTag -> {
         });

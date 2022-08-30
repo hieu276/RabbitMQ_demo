@@ -14,7 +14,8 @@ public class ReceiveLogsTopic1 {
     private static final String EXCHANGE_NAME = "topic_logs";
 
     public static void main(String[] argv) throws Exception {
-        Logger logger = initLogger();
+        System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, "config/logback.xml");
+        Logger logger = LoggerFactory.getLogger("hieund.logback");
         Connection connection = getConnection();
         Channel channel = connection.createChannel();
         channel.exchangeDeclare(EXCHANGE_NAME, "topic");
@@ -28,12 +29,6 @@ public class ReceiveLogsTopic1 {
             logger.info("Received '" + delivery.getEnvelope().getRoutingKey() + "':'" + message + "'");
         };
         channel.basicConsume(queueName, true, deliverCallback, consumerTag -> { });
-    }
-
-    private static Logger initLogger() {
-        System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, "config/logback.xml");
-        Logger logger = LoggerFactory.getLogger("hieund.logback");
-        return logger;
     }
 
     private static Connection getConnection() throws IOException, TimeoutException {
